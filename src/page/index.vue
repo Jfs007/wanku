@@ -23,6 +23,10 @@ export default {
     return {
       libs: [
         {
+          name: 'range',
+          link: 'range'
+        },
+        {
           name: 'flex',
           link: 'flex'
         },

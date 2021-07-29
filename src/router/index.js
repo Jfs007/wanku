@@ -13,6 +13,12 @@ export default new Router({
       name: 'index',
       component: __import__('page/index.vue')
     },
+
+    {
+      path: '/range',
+      name: 'range',
+      component: __import__('page/range.vue')
+    },
     
     {
       path: '/flv',
