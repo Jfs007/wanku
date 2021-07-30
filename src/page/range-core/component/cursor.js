@@ -1,4 +1,4 @@
-class Currsor {
+class Cursor {
     constructor() {
         
     }

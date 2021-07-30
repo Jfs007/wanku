@@ -29,6 +29,9 @@ export default class Paragraphs extends Base {
         }
 
     }
+    getTextLength(text) {
+        return text.length;
+    }
     getLastUnit(spans) {
         return spans[spans.length - 1];
     }
@@ -39,6 +42,46 @@ export default class Paragraphs extends Base {
         return currentSpans[uindex - 1];
 
     }
+    getTextRange(pos, pos1, startOffset, endOffset) {
+        let textRange = [0, 0];
+        for (let index = 0; index <= pos1[0]; index++) {
+            let spans = this.spans[index];
+            
+            let startCount = true;
+            let endCount = true;
+            spans.map((unit, idx) => {
+
+                // 表示在第一行
+                if ((index == pos[0]) && startCount) {
+                    if (idx == pos[1]) {
+                        startCount = false;
+                        textRange[0] = textRange[0] + (+startOffset+1);
+                    }
+                }
+               
+                if ((pos1[0] == index) && endCount) {
+                   
+                    if (idx == pos1[1]) {
+                        endCount = false;
+                        textRange[1] = textRange[1] + (+endOffset);
+                    }
+
+
+                }
+                if (startCount) {
+                    textRange[0] = textRange[0] + unit.getTextLength();
+                    textRange[1] = textRange[0];
+                }
+                if (!startCount && endCount) {
+                    textRange[1] = textRange[1] + unit.getTextLength();
+                }
+
+            });
+           
+
+        }
+        return textRange;
+    }
     getNextUnit(pos, level = 1) {
         let [pindex, uindex] = pos;
         let currentSpans = this.spans[pindex];
@@ -48,6 +91,7 @@ export default class Paragraphs extends Base {
     }
     commentDiff(comments, diffComments) {
         let sameUnit = null;
+        if (!(comments && diffComments)) return sameUnit;
         for (let i = 0; i < comments.length; i++) {
             let comment = comments[i];
             let same = diffComments.find(diffComment => comment == diffComment);
@@ -101,10 +145,14 @@ export default class Paragraphs extends Base {
     }
 
 
+
+
+
     splitUnit(componse, comments) {
         let [[start, pos], [start1, pos1]] = componse;
         let unit1 = this.spans[pos[0]][pos[1]];
         let unit2 = this.spans[pos1[0]][pos1[1]];
+        
         let unit1text = unit1.text;
         let unit2text = unit2.text;
         if (pos1[0] - pos[0] > 0) {
@@ -127,13 +175,20 @@ export default class Paragraphs extends Base {
                 })
             }
         }
+        if(pos1[0] - pos[0] == 0 && pos1[1] - pos[1]>1) {
+            this.spans[pos[0]].map((unit, index) => {
+                if(pos1[1]>index&&pos[1]<index) {
+                    unit.setComments(comments);
+                }
+            })
+        }
 
         let isUnitSame = (pos[0] == pos1[0] && pos[1] == pos1[1]);
         let isParagraghSame = pos[0] == pos1[0];
+
+
         let [text1, text2] = this.splitText(unit1text, start);
         if (!text1 || !text2) { isParagraghSame = false } else {
-
-
             let textUnits = [];
             if (text1) {
                 let tu1 = new textUnit({
@@ -154,19 +209,18 @@ export default class Paragraphs extends Base {
 
             this.spans[pos[0]].splice(pos[1], 1, ...textUnits
             );
-
-
         };
 
-
+        // 同一个元素
         if (isUnitSame) {
             unit2text = text2;
             start1 = start1 - start;
         }
         let [text3, text4] = this.splitText(unit2text, start1);
+        // console.log(text3, text4)
         let pos11 = +pos1[1] + (isParagraghSame ? 1 : 0);
         let textUnits1 = [];
-        if(text3) {
+        if (text3) {
             let tu3 = new textUnit({
                 ...unit2,
                 text: text3,

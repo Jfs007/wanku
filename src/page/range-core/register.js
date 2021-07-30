@@ -13,6 +13,8 @@ export default function Register(el) {
         let selection = window.getSelection();
         if (selection && !selection.isCollapsed) {
             let range = selection.getRangeAt(0);
+            console.log(range.startContainer, range.endContainer, )
+            
             events.trigger('range-select', {
                 startNode: getContainerNode(range.startContainer),
                 endNode: getContainerNode(range.endContainer),

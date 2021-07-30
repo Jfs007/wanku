@@ -32,7 +32,7 @@ export let getContainerNode = (textNode) => {
     if (isTextNode(textNode)) {
         return textNode.parentNode;
     }
-    return textNode.parentNode;
+    return textNode;
     // return textNode;
 }
 
