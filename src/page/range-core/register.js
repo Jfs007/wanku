@@ -11,6 +11,7 @@ export default function Register(el) {
     let events = new Events(el);
     events.addEvent('mouseup', () => {
         let selection = window.getSelection();
+        // console.log(selection.isCollapsed, 'is')
         if (selection && !selection.isCollapsed) {
             let range = selection.getRangeAt(0);
             console.log(range.startContainer, range.endContainer, )

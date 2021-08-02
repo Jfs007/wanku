@@ -46,7 +46,7 @@ export default class Paragraphs extends Base {
         let textRange = [0, 0];
         for (let index = 0; index <= pos1[0]; index++) {
             let spans = this.spans[index];
-            
+
             let startCount = true;
             let endCount = true;
             spans.map((unit, idx) => {
@@ -55,12 +55,12 @@ export default class Paragraphs extends Base {
                 if ((index == pos[0]) && startCount) {
                     if (idx == pos[1]) {
                         startCount = false;
-                        textRange[0] = textRange[0] + (+startOffset+1);
+                        textRange[0] = textRange[0] + (+startOffset + 1);
                     }
                 }
-               
+
                 if ((pos1[0] == index) && endCount) {
-                   
+
                     if (idx == pos1[1]) {
                         endCount = false;
                         textRange[1] = textRange[1] + (+endOffset);
@@ -77,7 +77,7 @@ export default class Paragraphs extends Base {
                 }
 
             });
-           
+
 
         }
         return textRange;
@@ -146,15 +146,16 @@ export default class Paragraphs extends Base {
 
 
 
+    mapUnit() {
+        for (let index = pos[0]; index <= pos1[0]; index++) {
 
+        }
+    }
 
-    splitUnit(componse, comments) {
+    splitUnit(componse, comments, textRange) {
         let [[start, pos], [start1, pos1]] = componse;
         let unit1 = this.spans[pos[0]][pos[1]];
         let unit2 = this.spans[pos1[0]][pos1[1]];
-        
-        let unit1text = unit1.text;
-        let unit2text = unit2.text;
         if (pos1[0] - pos[0] > 0) {
             for (let index = pos[0]; index <= pos1[0]; index++) {
                 let spans = this.spans[index];
@@ -175,82 +176,64 @@ export default class Paragraphs extends Base {
                 })
             }
         }
-        if(pos1[0] - pos[0] == 0 && pos1[1] - pos[1]>1) {
+        if (pos1[0] - pos[0] == 0 && pos1[1] - pos[1] > 1) {
             this.spans[pos[0]].map((unit, index) => {
-                if(pos1[1]>index&&pos[1]<index) {
+                if (pos1[1] > index && pos[1] < index) {
                     unit.setComments(comments);
                 }
             })
         }
 
+
         let isUnitSame = (pos[0] == pos1[0] && pos[1] == pos1[1]);
         let isParagraghSame = pos[0] == pos1[0];
-
-
-        let [text1, text2] = this.splitText(unit1text, start);
-        if (!text1 || !text2) { isParagraghSame = false } else {
-            let textUnits = [];
-            if (text1) {
-                let tu1 = new textUnit({
-                    ...unit1,
-                    text: text1,
-                });
-                textUnits.push(tu1);
-            }
-            if (text2) {
-                let tu2 = new textUnit({
-                    ...unit1,
-                    text: text2,
-                });
-                tu2.setComments(comments);
-                textUnits.push(tu2);
-            }
-
-
-            this.spans[pos[0]].splice(pos[1], 1, ...textUnits
-            );
-        };
-
-        // 同一个元素
-        if (isUnitSame) {
-            unit2text = text2;
-            start1 = start1 - start;
+        if(!unit1.isText()) {
+            unit1.setComments(comments);
         }
-        let [text3, text4] = this.splitText(unit2text, start1);
-        // console.log(text3, text4)
-        let pos11 = +pos1[1] + (isParagraghSame ? 1 : 0);
-        let textUnits1 = [];
-        if (text3) {
-            let tu3 = new textUnit({
-                ...unit2,
-                text: text3,
+
+
+        let modal = unit1.fission(start, isUnitSame ? start1 : undefined);
+       
+        modal = modal.map(_ => {
+            let unit = new textUnit({
+                ...unit1,
+                text: _.text
+            }); 
+            if (_.isRange) {
+                unit.setComments(comments);
+            }
+            return unit;
+        });
+        if(modal.length) {
+            this.spans[pos[0]].splice(pos[1], 1, ...modal);
+        }
+       
+        if (!isUnitSame) {
+            
+            if(!unit2.isText()) {
+                unit2.setComments(comments);
+            }
+            let oneModalLength = modal.length;
+            modal = unit2.fission(0, start1);
+            console.log(unit2.isText(), modal, unit2)
+            modal = modal.map(_ => {
+                let unit = new textUnit({
+                    ...unit2,
+                    text: _.text
+                });
+                if (_.isRange) {
+                    unit.setComments(comments);
+                }
+                return unit;
             });
-            tu3.setComments(comments);
-            textUnits1.push(tu3);
 
+            let offset = oneModalLength - 1 <= 0 ? 0 : oneModalLength - 1;
+            let pos11 = +pos1[1] + (isParagraghSame ? offset : 0);
+            if(modal.length) {
+                this.spans[pos1[0]].splice(pos11, 1, ...modal);
+            }
+           
         }
-
-        if (text4) {
-            let tu4 = new textUnit({
-                ...unit2,
-                text: text4
-            })
-            textUnits1.push(tu4);
-        }
-        this.spans[pos1[0]].splice(pos11, 1, ...textUnits1);
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     }
 }

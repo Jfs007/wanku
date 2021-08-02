@@ -45,6 +45,10 @@
 }
 .jf-editor__paragragh {
   font-size: 0;
+  /* user-select: none; */
+}
+.jf-editor__paragragh * {
+  user-select: all;
 }
 .jf-editor__paragragh .jf-unit {
   font-size: 16px;
@@ -152,7 +156,7 @@ export default {
   methods: {
     cI(item) {
       let components = { text: RangeText, image: RangeImage };
-      console.log(item.type, "type");
+      // console.log(item.type, "type");
       return components[item.type];
     },
     selectComment(pos) {
@@ -200,6 +204,7 @@ export default {
         startOffset,
         endOffset
       );
+      console.log(startOffset, endOffset)
       // console.log(textRange)
       if (!this.hasExitComment(textRange).length) {
         let id = "commit-" + Date.now();
