@@ -14,14 +14,14 @@ export default function Register(el) {
         // console.log(selection.isCollapsed, 'is')
         if (selection && !selection.isCollapsed) {
             let range = selection.getRangeAt(0);
-            console.log(range.startContainer, range.endContainer, )
-            
             events.trigger('range-select', {
                 startNode: getContainerNode(range.startContainer),
                 endNode: getContainerNode(range.endContainer),
                 startOffset: range.startOffset,
                 endOffset: range.endOffset,
             });
+        }else {
+            events.trigger('range-select', {})
         }
 
 

@@ -5,5 +5,7 @@ export default class Comment extends Base {
         this.id = options.id;
         this.text = options.text || '';
         this.textRange = options.textRange || [];
+        this.is_new = options.is_new || undefined;
+        this.user = options.user || null;
     }
 }
